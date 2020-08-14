@@ -1,2 +1,2 @@
-# Linux_Security
-Code to help you secure your Linux environment
+# Linux_Scripts
+Code to help you manage and secure your Linux environment (Primarily Oracle Linux).
