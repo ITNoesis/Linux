@@ -1,0 +1,29 @@
+---
+- hosts: all
+  gather_facts: no
+  vars: 
+    MSteams_webhook: "https://outlook.office.com/webhook/<IncomingWebhook>"
+
+
+  tasks:
+    - name: "Check for users having empty passwords"
+      become: yes
+      become_user: root
+      shell: |
+         getent shadow | grep '^[^:]*::' | cut -d: -f1
+      register: emptypasswd
+
+    - name: "Report users with empty passwords"
+      debug:
+        msg: |
+          "Following users have empty passwords
+          {{ emptypasswd.stdout }}"
+      when: emptypasswd.stdout != ""
+
+    - name: Send notification to Linux team
+      office_365_connector_card:
+        webhook: "{{ MSteams_webhook }}"
+        summary: Report of users with empty passwords
+        title: Report of users with empty passwords available now
+        text: A report of users with empty passwords has been generated. Please check the build for details.
+      run_once: true
