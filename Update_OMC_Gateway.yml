@@ -1,0 +1,24 @@
+---
+- hosts: {{config}}
+  gather_facts: no
+  vars:
+    omc_user: "svc-omc"
+    omc_install_path: "/opt/omc/agent/agent_inst/bin"
+    gatewayurls: "https://<gatewayhost1>.<domain>.com:<gateway_port>/emd/gateway,https://<gatewayhost1>.<domain>.com:<gateway_port>/emd/gateway"
+
+  tasks:
+    - name: Update OMC Gateway URLs
+      shell:
+        chdir: "{{ omc_install_path }}"
+        cmd: |
+          sh ./omcli setproperty agent -name gatewayUrls -value "{{ gatewayurls }}"
+      become: yes
+      become_user: "{{omc_user}}"
+
+    - name: Restart OMC agent
+      shell:
+        chdir: "{{ omc_install_path }}"
+        cmd: |
+          sh ./omcli stop agent && sh ./omcli start agent
+      become: yes
+      become_user: "{{omc_user}}"
