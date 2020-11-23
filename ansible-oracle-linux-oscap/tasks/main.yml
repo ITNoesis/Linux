@@ -1,2 +1,158 @@
 ---
 # tasks file for ansible-oracle-linux-oscap
+
+- name: "Check if report share exists"
+  stat:
+    path: "{{ Central_report_dir }}"
+  register: reports_share
+  delegate_to: "{{ central_server }}"
+  run_once: yes
+
+- name: "Create central reports share if not exists"
+  file:
+    path: "{{ Central_report_dir }}"
+    state: directory
+    mode: 0777
+    owner: "{{ oscap-user }}"
+  delegate_to: "{{ central_server }}"
+  become: yes
+  become_user: "{{ oscap-user }}"
+  when: reports_share.stat.exists == false
+  run_once: yes
+
+- name: "Mount required shares"
+  become: yes
+  become_user: root
+  mount:
+    path: "{{ Central_report_dir }}"
+    src: zfsmid:/export/sec/scan
+    fstype: nfs
+    opts: rw,bg,hard,nointr,rsize=1048576,wsize=1048576,tcp,vers=4,timeo=600,noacl,tcp
+    dump: 0
+    passno: 0
+    boot: yes
+    state: mounted
+  delegate_to: "{{ central_server }}"
+  #when: reports_share.stat.exists == true
+  run_once: yes
+
+- name: "Check if central report directory exists"
+  stat:
+    path: "{{ Central_report_dir }}/oscap-scan-latest"
+  register: c_reports_dir
+  delegate_to: "{{ central_server }}"
+  become: yes
+  become_user: "{{ oscap-user }}"
+  run_once: yes
+
+- name: "Rename previous central report directory if exists"
+  shell: |
+      mv {{ Central_report_dir }}/oscap-scan-latest {{ Central_report_dir }}/oscap-scan-{{ lookup('pipe', 'date +%Y%m%d-%H%M') }}
+  when: c_reports_dir.stat.exists == true
+  delegate_to: "{{ central_server }}"
+  become: yes
+  become_user: "{{ oscap-user }}"
+  run_once: yes
+
+- name: "Create central reports directory"
+  file:
+    path: "{{ Central_report_dir }}/oscap-scan-latest"
+    state: directory
+    mode: 0777
+    owner: "{{ oscap-user }}"
+  delegate_to: "{{ central_server }}"
+  become: yes
+  become_user: "{{ oscap-user }}"
+  run_once: yes
+
+- name: "Check if OVAL directory exists"
+  stat:
+    path: "{{ Central_report_dir }}/OVAL"
+  register: oval_dir
+  delegate_to: "{{ central_server }}"
+  run_once: yes
+
+- name: "Create OVAL directory if not exists"
+  file:
+    path: "{{ Central_report_dir }}/OVAL"
+    state: directory
+    mode: 0777
+    owner: "{{ oscap-user }}"
+  delegate_to: "{{ central_server }}"
+  become: yes
+  become_user: "{{ oscap-user }}"
+  when: oval_dir.stat.exists == false
+  run_once: yes
+
+- name: "Install and update openscap packages"
+  package:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+  - openscap-scanner
+  - scap-security-guide
+
+- name: "Copy pre-req OVAL xml file"
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: "{{item.mode}}"
+  with_items:
+    - {
+        src:  "{{ Central_report_dir }}/OVAL/com.oracle.elsa-all.xml",
+        dest: "{{ scap_config_dir }}/com.oracle.elsa-all.xml",
+        mode: "u+rwr"
+      }
+
+- name: "Check if local report directory exists"
+  stat:
+    path: "{{ local_report_dir }}"
+  register: lc_report_dir
+  run_once: yes
+
+- name: "Create local directory if not exists"
+  file:
+    path: "{{ local_report_dir }}"
+    state: directory
+    mode: 0777
+    owner: root
+  when: lc_report_dir.stat.exists == false
+
+- name: "Run Security Scan for OEL 6"
+  shell: |
+    oscap xccdf eval \
+    --profile {{ oscap_profile }} \
+    --report {{ local_report_dir }}/{{ inventory_hostname }}_oscap-report.html \
+    "{{ scap_config_dir }}/{{ oscap_policy_oel6 }}.xml"
+  ignore_errors: true
+  when:
+    - ansible_facts['distribution'] == "OracleLinux"
+    - ansible_facts['distribution_major_version'] == "6"
+
+- name: "Run Security Scan for OEL 7"
+  shell: |
+    oscap xccdf eval \
+    --profile {{ oscap_profile }} \
+    --report {{ local_report_dir }}/{{ inventory_hostname }}_oscap-report.html \
+    "{{ scap_config_dir }}/{{ oscap_policy_oel7 }}.xml"
+  ignore_errors: true
+  when:
+    - ansible_facts['distribution'] == "OracleLinux"
+    - ansible_facts['distribution_major_version'] == "7"
+
+- name: "Run OVAL Scan"
+  shell: |
+    oscap oval eval --results {{ local_report_dir }}/{{ inventory_hostname }}_elsa-results-oval.xml   --report {{ local_report_dir }}/{{ inventory_hostname }}_elsa-report-oval.html   {{ scap_config_dir }}/com.oracle.elsa-all.xml
+  ignore_errors: true
+
+- name: "Download reports"
+  synchronize:  src={{ item }} dest={{ Central_report_dir }}/ mode=pull
+  with_items:
+    - "{{ local_report_dir }}"
+  become: yes
+  become_user: "{{ oscap-user }}"
+
+- name: "Delete local reports"
+  file:
+    state: absent
+    path: "{{ local_report_dir }}/"
