@@ -20,22 +20,6 @@
   when: reports_share.stat.exists == false
   run_once: yes
 
-- name: "Mount required shares"
-  become: yes
-  become_user: root
-  mount:
-    path: "{{ Central_report_dir }}"
-    src: zfsmid:/export/sec/scan
-    fstype: nfs
-    opts: rw,bg,hard,nointr,rsize=1048576,wsize=1048576,tcp,vers=4,timeo=600,noacl,tcp
-    dump: 0
-    passno: 0
-    boot: yes
-    state: mounted
-  delegate_to: "{{ central_server }}"
-  #when: reports_share.stat.exists == true
-  run_once: yes
-
 - name: "Check if central report directory exists"
   stat:
     path: "{{ Central_report_dir }}/oscap-scan-latest"
