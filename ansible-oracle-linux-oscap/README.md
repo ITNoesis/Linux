@@ -13,14 +13,14 @@ Role Variables
 
 This role requires the following variables which are defined in defaults/main.yml.
 
-oscap_profile: standard
-oscap_policy_oel7: ssg-rhel7-xccdf
-oscap_policy_oel6: ssg-rhel6-xccdf
-local_report_dir: /tmp/oscap-scan-latest
-Central_report_dir: /mnt/sec_scan
-scap_config_dir: /usr/share/xml/scap/ssg/content
-ansible_python_interpreter: "/usr/bin/python"
-central_server: <FQDN of ansible controller server>
+      oscap_profile: standard
+      oscap_policy_oel7: ssg-rhel7-xccdf
+      oscap_policy_oel6: ssg-rhel6-xccdf
+      local_report_dir: /tmp/oscap-scan-latest
+      Central_report_dir: /mnt/sec_scan
+      scap_config_dir: /usr/share/xml/scap/ssg/content
+      ansible_python_interpreter: "/usr/bin/python"
+      central_server: <FQDN of ansible controller server>
 
 Dependencies
 ------------
