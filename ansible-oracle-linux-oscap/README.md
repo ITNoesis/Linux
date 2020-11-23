@@ -1,7 +1,7 @@
-Role Name
+ansible-oracle-linux-oscap
 =========
 
-A brief description of the role goes here.
+Ansible role to execute OSCAP (OpenSCAP) scan on multiple Oracle Linux machines. Do not use this role on engineered systems like (PCA, ZFS and Exadata).
 
 Requirements
 ------------
@@ -11,12 +11,23 @@ Any pre-requisites that may not be covered by Ansible itself or the role should 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+This role requires the following variables which are defined in defaults/main.yml.
+
+oscap_profile: standard
+oscap_policy_oel7: ssg-rhel7-xccdf
+oscap_policy_oel6: ssg-rhel6-xccdf
+local_report_dir: /tmp/oscap-scan-latest
+Central_report_dir: /mnt/sec_scan
+scap_config_dir: /usr/share/xml/scap/ssg/content
+ansible_python_interpreter: "/usr/bin/python"
+central_server: <FQDN of ansible controller server>
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+OVAL definitions file (com.oracle.elsa-all.xml).
+#TODO
+Add code to download the definitions file, controlled by download flag.
 
 Example Playbook
 ----------------
@@ -25,7 +36,7 @@ Including an example of how to use your role (for instance, with variables passe
 
     - hosts: servers
       roles:
-         - { role: username.rolename, x: 42 }
+         - { role: ansible-oracle-linux-oscap }
 
 License
 -------
@@ -35,4 +46,5 @@ BSD
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Arun Yadav
+(www.itnoesis.com)
