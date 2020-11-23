@@ -8,3 +8,4 @@ Central_report_dir: /mnt/sec_scan
 scap_config_dir: /usr/share/xml/scap/ssg/content
 ansible_python_interpreter: "/usr/bin/python"
 central_server: oel7.itnoesis.com
+oscap-user: itnoesis
