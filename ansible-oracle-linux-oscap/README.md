@@ -1,7 +1,16 @@
 ansible-oracle-linux-oscap
 =========
 
-Ansible role to execute OSCAP (OpenSCAP) scan on multiple Oracle Linux machines. Do not use this role on engineered systems like (PCA, ZFS and Exadata).
+Ansible role to execute OVAL (Open Vulnerability and Assessment Language) and XCCDF (Extensible Configuration Checklist Description Format) based OSCAP (OpenSCAP) scan on multiple Oracle Linux machines. 
+
+Use this role to:
+1. Install the latest oscap packages
+2. Scan Oracle Linux systems
+3. Collect all the html and xml reports at a centralized location (ansible controller)
+
+By default, this role scans the systems based on standard profile however, the behaviour can be controlled by the variable "oscap_profile".
+
+IMP: Do not use this role on engineered systems like (PCA, ZFS and Exadata).
 
 Requirements
 ------------
