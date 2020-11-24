@@ -12,10 +12,15 @@ By default, this role scans the systems based on standard profile however, the b
 
 IMP: Do not use this role on engineered systems like (PCA, ZFS and Exadata).
 
-Requirements
+Samples:
 ------------
+OVAL Scan results:
+![alt text](https://github.com/ITNoesis/Linux/blob/master/ansible-oracle-linux-oscap/tests/OVAL_Results1.PNG?raw=true)
+![alt text](https://github.com/ITNoesis/Linux/blob/master/ansible-oracle-linux-oscap/tests/OVAL_Results2.PNG?raw=true)
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+OSCAP XCCDF Scan results:
+![alt text](https://github.com/ITNoesis/Linux/blob/master/ansible-oracle-linux-oscap/tests/SCAP1.PNG?raw=true)
+![alt text](https://github.com/ITNoesis/Linux/blob/master/ansible-oracle-linux-oscap/tests/SCAP2.PNG?raw=true)
 
 Role Variables
 --------------
